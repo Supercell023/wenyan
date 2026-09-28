@@ -84,6 +84,7 @@ fun SessionDrawerContent(
         // v1.7.1-4：新建会话 = 液态玻璃胶囊（strong 玻璃 + accent 字，与玻璃侧栏同材质）
         GlassSurface(
             onClick = onNewSession,
+            enablePressAnimation = false,
             shape = RoundedCornerShape(22.dp),
             strong = true,
             modifier = Modifier
@@ -219,10 +220,11 @@ private fun SessionItem(
         }
     } else {
         GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            modifier = Modifier.fillMaxWidth(),
             shape = GtjShape.md,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            enablePressAnimation = false,
         ) {
             SessionItemContent(session, p)
         }

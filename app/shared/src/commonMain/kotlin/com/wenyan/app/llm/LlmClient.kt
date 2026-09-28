@@ -270,15 +270,21 @@ class LlmClient(
     }
 
     companion object {
-        fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .apply {
-                // 桌面版（jpackage 已开启 useSystemProxies）：OkHttp 默认不读系统代理，
-                // 显式用 ProxySelector.getDefault() 走系统代理；Android 上 getDefault() 为 null 时保持默认（直连）
-                val ps = ProxySelector.getDefault()
-                if (ps != null) proxySelector(ps)
-            }
-            .build()
+        // A new LlmClient is resolved for each message. Reuse OkHttp's pool so
+        // subsequent requests can reuse an existing TCP/TLS/HTTP2 connection.
+        private val sharedClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .apply {
+                    // 桌面版（jpackage 已开启 useSystemProxies）：OkHttp 默认不读系统代理，
+                    // 显式用 ProxySelector.getDefault() 走系统代理；Android 上 getDefault() 为 null 时保持默认（直连）
+                    val ps = ProxySelector.getDefault()
+                    if (ps != null) proxySelector(ps)
+                }
+                .build()
+        }
+
+        fun defaultClient(): OkHttpClient = sharedClient
     }
 }

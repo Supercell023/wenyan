@@ -1,7 +1,9 @@
 package com.wenyan.app.ui.components.glass
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.animation.core.animateFloatAsState
@@ -312,11 +314,13 @@ fun Modifier.liquidGlass(
  * 带 onClick 时内部先 clip 再 clickable，保证涟漪不溢出圆角而投影保持完整。
  */
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun GlassSurface(
     modifier: Modifier = Modifier,
     shape: Shape = GtjShape.xl,
     strong: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     refractionStrength: Float = 0.5f,
     scrollVelocity: Float = 0f,
@@ -335,7 +339,17 @@ fun GlassSurface(
             modifier
                 .then(glass)
                 .clip(shape)
-                .clickable(enabled = enabled, onClick = onClick),
+                .then(
+                    if (onLongClick != null) {
+                        Modifier.combinedClickable(
+                            enabled = enabled,
+                            onClick = onClick,
+                            onLongClick = onLongClick,
+                        )
+                    } else {
+                        Modifier.clickable(enabled = enabled, onClick = onClick)
+                    },
+                ),
             content = content,
         )
     } else {
